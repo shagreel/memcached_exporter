@@ -1,0 +1,29 @@
+{{- if .Values.serviceMonitor.enabled -}}
+{{- $fullName := include "helm.fullname" . -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app.kubernetes.io/name: {{ include "helm.name" . }}
+    helm.sh/chart: {{ include "helm.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- toYaml .Values.serviceMonitor.labels | nindent 4 }}
+  namespace: {{ .Values.serviceMonitor.namespace }}
+  {{- with .Values.serviceMonitor.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "helm.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.service.namespace }}
+  endpoints:
+  - targetPort: {{ .Values.service.port }}
+    interval: {{ .Values.serviceMonitor.interval }}
+    path: {{ .Values.serviceMonitor.path }}
+{{- end }}

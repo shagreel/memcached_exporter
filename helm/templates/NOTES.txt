@@ -1,0 +1,15 @@
+Scraping {{ include "helm.fullname" . }}:{{ .Values.service.port }}{{ .Values.serviceMonitor.path }} every {{ .Values.serviceMonitor.interval }}
+
+Get the application URL by running these commands:
+
+    echo "Visit http://localhost:{{ .Values.service.port }}{{ .Values.service.path }} to use your application"
+    kubectl port-forward svc/{{ include "helm.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+
+{{- if .Values.serviceMonitor.enabled }}
+
+Any Prometheus instance observing the following labels should have the scraped values available.
+    {{ toYaml .Values.serviceMonitor.labels | nindent 4 }}
+
+You can run `kubectl get Prometheus -o yaml -n monitoring` to check what labels
+your prometheus is watching for. See the serviceMonitorSelector values.
+{{- end }}
